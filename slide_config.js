@@ -1,8 +1,8 @@
 var SLIDE_CONFIG = {
   // Slide settings
   settings: {
-    title: 'Performance and Benchmarking<br>in Java',
-    subtitle: 'Myths, challenges and best practices',
+    title: 'Interruptions in<br>Agile teams',
+    subtitle: 'How multitasking kills productivity',
     useBuilds: true, // Default: true. False will turn off slide animation builds.
     usePrettify: true, // Default: true
     enableSlideAreas: true, // Default: true. False turns off the click areas on either slide of the slides.

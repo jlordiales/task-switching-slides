@@ -36,7 +36,7 @@ URL: https://code.google.com/p/io-2012-slides
         </hgroup>
     </slide>
 
-    <slide>
+   <!-- <slide>
     <hgroup>
       <h2>Outline</h2>
     </hgroup>
@@ -51,876 +51,208 @@ URL: https://code.google.com/p/io-2012-slides
         <li>Conclusions</li>
       </ul>	  	
     </article>
-  </slide>
-
-   <slide class="segue dark quote nobackground">
-    <aside class="gdbar right bottom"><img src="images/lechuza.png"></aside>
-    <article class="flexbox vleft auto-fadein smaller">
-      <q>
-        First make your code right, and then make it fast.
-      </q>	
-      <div class="author">
-        Brian Goetz<br>
-        Java Concurrency in Practice
-      </div>
-    </article>
-  </slide>
-
-   <slide class="segue dark quote nobackground">
-    <aside class="gdbar right bottom"><img src="images/lechuza.png"></aside>
-    <article class="flexbox vleft auto-fadein smaller">
-      <q>
-        Even if you know exactly what is going on in your system, measure performance, don't speculate. You'll learn something, and nine times out of ten, it won't be that you were right!
-      </q>	
-      <div class="author">
-        Ron Jeffries<br>
-        Refactoring: Improving the Design of Existing Code
-      </div>
-    </article>
-  </slide>
-
+  </slide> -->
 
   <slide>
     <hgroup>
-      <h2>Micro-benchmarking</h2>
-      <h3>What is it?</h3>	
+      <h2>Multitasking</h2>
+      <h3>How the brain works</h3>  
     </hgroup>
     <aside class="note">
       <section>
-        <ul>
-          <li>Mencionar diferencias entre micro-benchmark y profiling</li>
-          <li>Herramientas para profiling</li>
-        </ul>
+        <p> Why? Because a computer is designed to multitask. When a computer switches from performing one task to another, it saves the entire state of the task being switched out, enabling the computer to literally pick up where it left of when it returns to that task.</p>
       </section>
     </aside>
     <article>
       <ul>
-        <li>A microbenchmark attempts to measure the performance of a "small" bit of code</li>
-	    <li>Micro-benchmarking != Profiling</li>
+        <li>Computers are much better at multi-tasking than humans are</li>
+	    <li>Humans aren’t wired that way</li>
+        <li>New information must reside in short term memory for a length of time before it is moved into long term memory</li>
+        <li>That is why cramming for an exam may get you a better grade but you may remember little of the material two weeks later</li>
+        <li>It's just too hard to retain the last thing you worked on before the context switch</li>
       </ul>	  	
     </article>
   </slide>
 
   <slide>
     <hgroup>
-      <h2>Micro-benchmarking</h2>
-      <h3>A naive approach</h3>
-    </hgroup>
-    <article>
-      <pre class="prettyprint" data-lang="java">
-public void doBenchmark() {
-	<b>long initialTime = System.currentTimeMillis();
-	codeToTest();
-	long finalTime = System.currentTimeMillis();
-	long runTime = finalTime - initialTime;</b>
-}
-	</pre>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Challenges in Micro-benchmarking</h2>
-    </hgroup>
-    <article>
-      <ul class="build">
-        <li>Java, interpreted or compiled?
-	<ul class="build"> <li>Neither and both at the same time!</li></ul>
-	</li>
-	<li>Java uses dynamic compilation</li>
-	<li>That makes micro-benchmarking far from trivial</li>
-      </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Dynamic compilation</h2>
-      <h3>A brief history</h3>
+      <h2>Multitasking</h2>
+      <h3>How the brain works</h3>
     </hgroup>
     <aside class="note">
       <section>
-        <ul>
-          <li>Mencionar javac y los .class (bytecode)</li>
-        </ul>
+        <p>It is doing it all day long. It even does it at night. There are many parts of the brain that are working together and alone all the time. We could not function in our complex environments otherwise. Most of the multitasking is subconscious – filtering of sensory input, integration of related information, moving data from short term to long term memory, keeping the heart and lungs going. Driving the car while we navigate and listen to the traffic reports, talking on the phone while we make dinner, planning vacation while we are weeding the garden.</p>
       </section>
     </aside>
     <article>
-	<ul>
-        <li>The Java compiler transforms source code into JVM portable bytecode
-	<ul><li>Like "virtual machine instructions" for the JVM</li></ul></li>
-	<li>How do those bytecodes run on an actual machine?</li>
-      </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Dynamic compilation</h2>
-      <h3>A brief history</h3>
-    </hgroup>
-    <aside class="note">
-      <section>
-        <ul>
-          <li>Primeras JVMs como pruebas de concepto</li>
-          <li>La performance de Java ahora esta a la par (o mejor) de cualquier otro lenguaje compilado</li>
-        </ul>
-      </section>
-    </aside>
-    <article>
-	<ul>
-        <li>The first JVM implementations (1995) were entirely interpreted
-	<ul><li>Ever heard "Java is slower than..."?</li></ul></li>
-	<li>Then Just in Time (JIT) compilers came along</li>
-      </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>JIT compiler</h2>
-    </hgroup>
-    <article class="flexbox vcenter">
-	<ul>
-            <li>Transforms bytecode to machine code in a lazy fashion</li>
-	    <li>It only compiles a code path when it knows that code path is about to be executed
-	    <ul><li>Hence the name...</li></ul></li>
-	    <li>Considerable improvement over fully interpreted</li>
-	    <li>However, the optimizations made by the JIT compiler were mediocre</li>
-	    <li>To solve this, Java 1.3 introduced HotSpot (actually Java 1.2 but only as an add-on)</li>			
-        </ul>
-        <img src="images/300px-JITcompilation.jpg" alt="Description" title="Description">
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>HotSpot</h2>
-    </hgroup>
-    <aside class="note">
-      <section>
-        <ul>
-          <li>Client comienza mas rapido pero aplica menos optimizaciones. Ideal para GUIs pq hay poca variabilidad</li>
-          <li>Server tiene un start-up mas lento pero a la larga tiene mejor performance. Ideal para procesos largos</li>
-          <li>Primera version de HotSpot en 1999</li>
-        </ul>
-      </section>
-    </aside>
-    <article>
-	    <ul>
-            <li><a href="http://en.wikipedia.org/wiki/List_of_Java_virtual_machines">Primary reference Java VM implementation</a></li>
-            <li>Has client and server mode</li>
-            <li>Combines interpretation, dynamic compilation and profiling</li>
-	        <li>Doesn't compile all bytecode to machine code before execution</li>
-	        <li>It starts in interpreted mode while collecting profiling data</li>
-	        <li>It then compiles only the "hot" code (the code executed most frequently)
-	        <ul><li>It doesn't waste time compiling code that is run infrequently</li>
-	        <li>That means it has more time to apply optimizations to code that is actually worth it</li>
-	        </ul></li>
-        </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>HotSpot</h2>
-      <h3>Continuous recompilation</h3>
-    </hgroup>
-    <article>
-	<ul>
-        <li>Compilation is not an "all or nothing" deal</li>
-	<li>A compiled code can be recompiled several times to apply further optimizations</li>
-	<li>It can even be de-compiled</li>
-	<li>You can use the "-XX:+PrintCompilation" flag to see some interesting logs</li>
-      </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>What about micro-benchmarking</h2>
-    </hgroup>
-    <article>
-	<ul>
-	<li>Benchmarking in static compiled languages like C is reasonably easy</li>
-	<li>Just look at the compiled machine code</li>
-        <li>Writing and interpreting benchmarks in Java is almost impossible without knowing the basics of dynamic compilation
-	<ul><li>Even then is pretty hard!</li></ul></li>
-      </ul>
+      <ul>
+        <li>The human brain multitasks internally all the time</li>
+        <li>And externally as well</li>
+        <li>So how is this translated to software development?</li>
+      </ul>	  	
     </article>
   </slide>
 
 <slide>
     <hgroup>
-      <h2>HotSpot</h2>
-      <h3>Dead code elimination</h3>
-    </hgroup>
-    <article>
-      <ul><li>The compiler can detect and remove dead code (code that has no effect on the outcome)</li></ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Dead code elimination</h2>
-      <h3>An example</h3>
-    </hgroup>
-    <article>
-      <ul><li>How much does this code take to run?</li></ul>	
-      <pre class="prettyprint" data-lang="java">
-private final int[] array = new int[1000000];
-
-public void timeArrayIteration_BAD() {
-   <b>for (int ignoreMe : array) {}</b>
-}
-	</pre>
-	<ul class="build">
-	   <li>1 ns in my laptop</li>
-	   <li>Wait... what? 1 ns to iterate over a million elements?</li>
-	</ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Java micro-benchmarking</h2>
-      <h3>Challenges</h3>	
-    </hgroup>
-    <article>
-	<ul>
-	<li>The code can be dynamically compiled and decompiled several times</li>
-	<li>The results are dependent on the hardware, OS and even JVM used</li>
-	<li>GC can start running in the middle of your benchmark</li>
-	<li>The compiler can decide to optimize away parts of your code</li>
-	<li>The list goes on and on...</li>
-      </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Java micro-benchmarking</h2>
-      <h3>When should you do it?</h3>	
-    </hgroup>
-    <article>
-	<ul>
-	<li>Most of the time, you shouldn't</li>
-	<li>Stick to clear code and good designs</li>
-	<li>The compiler does a better job at optimizing code than you anyways...</li>
-      </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>"Clever" optimization</h2>
-      <h3>Epic fail</h3>
+      <h2>Multitasking</h2>
+      <h3>Effect on software development</h3>
     </hgroup>
     <aside class="note">
       <section>
-        <ul>
-          <li>Que pasa si climb() tira un ArrayIndex...Exception()?</li>
-        </ul>
+        <p>Programmers keep a lot in their heads during the act of programming, like how the code will be organized, what data structures are being used, the naming and use of variables, all of which is centered on the act of translating business requirements into detailed instructions for the computer to follow.</p>
       </section>
     </aside>
-    <article class="smaller build">
-        <pre class="prettyprint" data-lang="java">
-for (int i=0; i < range.length; i++)
-    range[i].climb();
-	</pre>
-      <pre class="prettyprint" data-lang="java">
-try {
-    int i = 0;
-    while(true)
-        range[i++].climb();
-} catch(ArrayIndexOutOfBoundsException e) {}
-	</pre>
+    <article>
+      <ul>
+        <li>Unfortunately software development isn’t that simple</li>
+	    <li>It requires keeping a lot of details in your head along with applying some creative thought</li>
+        <li>Mental focus and concentration is essential</li>
+        <li>A person who works on more than one project incurs a cost at each shift from one project to the other</li>
+        <li>The more complex the task, the more time it takes to make the shift [6]</li>
+      </ul>	  	
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Multitasking</h2>
+      <h3>Effect on software development</h3>
+    </hgroup>
+    <article class="build">
+      <ul>
+        <li>What happens when a programmer is pulled of one programming project to work on another project or task?</li>
+	    <li>Valuable productivity is lost</li>
+        <li>A programming task estimated at 8 hours could take 2-3 calendar days if a programmer gets interrupted [5]</li>
+      </ul>	  	
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>The cost of task switching</h2>
+    </hgroup>
+    <article>
       
-	<ul class="build">
-	   <li>Reasoning: "The loop termination test must be really expensive"</li>
-	   <li>Performance aside, which one is clearer?</li>
-	   <li>The "optimized" version runs several times slower than the "non-optimized" version on any modern JVM</li>
-	</ul>
+        <img src="images/taskSwitchingCosts.png" alt="Description" title="Task switching costs">
     </article>
   </slide>
 
   <slide>
     <hgroup>
-      <h2>Java micro-benchmarking</h2>
-      <h3>How should you do it?</h3>	
-    </hgroup>
-    <article>
-	<ul>
-	<li>There are cases where micro-benchmarking can be useful
-	<ul>
-	    <li>"Should I use Implementation A or B of this algorithm?"</li>
-	    <li>"Is this code optimization really worth the simplicity it sacrifices"?</li>
-	    <li>"Does the latest JRE make this piece of code faster than previous versions"?</li>
-        <li>Plain fun: "My Java is faster than your..."</li>
-	</ul></li>
-	<li>Don't try to reinvent the wheel while writing micro-benchmarks</li>
-	<li>Someone has already done it!</li>
-      </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Caliper</h2>
-    </hgroup>
-    <article>
-	<ul>
-	<li>Google's open-source framework for writing, running and viewing the results of Java micro-benchmarks</li>
-	<li>It takes care of most of the challenges involved for you</li>
-	<li>It follows a convention similar to Junit 3</li>
-      </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Caliper</h2>
-      <h3>Structure of a benchmark</h3>
-    </hgroup>
-    <article class="smaller">
-      <pre class="prettyprint" data-lang="java">
-public class MyBenchmark extends SimpleBenchmark {
-@Override
-protected void setUp() throws Exception {
-    super.setUp();
-}
-@Override
-protected void tearDown() throws Exception {
-    super.tearDown();
-}
-public void timeMyOperation(int reps) {
-    for (int i = 0; i < reps; i++) {
-      MyClass.myOperation();
-    }
-  }
-}
-	</pre>
-	<ul>
-	   <li>All benchmark classes extend <a href="http://caliper.googlecode.com/svn/static/api/reference/com/google/caliper/SimpleBenchmark.html">SimpleBechmark</a></li>
-	   <li>Every benchmark method must begin with "time..." and have a "int reps" parameter</li>
-	   <li>There is "setup" and "tearDown" methods for init and cleanup tasks</li>
-	</ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Caliper</h2>
-      <h3>Passing parameters</h3>
-    </hgroup>
-    <article class="smaller">
-      <pre class="prettyprint" data-lang="java">
-@Param({ "2", "20", "2000", "200000" })int max;
-protected void setUp() throws Exception {
-    mArray = new Foo[max];
-    for (int i = 0; i < max; ++i)
-        mArray[i] = new Foo();    
-}
-public int timeArrayIterationForEach(int reps) {
-    int sum = 0;
-    for (int rep = 0; rep < reps; ++rep) {
-      for (final Foo a : mArray) 
-        sum += a.mSplat;      
-    }
-    return sum;
-}
-	</pre>
-	<ul>
-	   <li>You can specify parameters values directly on the code or pass them on the invocation (-Dmax=2,20,2000)</li>
-	   <li>Every benchmark in the class will run for each parameter value</li>
-	   <li>@Param values are guaranteed to be injected before the setup method runs</li>
-	</ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Caliper</h2>
-      <h3>Passing parameters</h3> 
-    </hgroup>
-    <article>
-        <ul><li>You can also specify a parameter of type Enum and the benchmark will automatically run for every possible value of the enumeration</li></ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Caliper</h2>
-      <h3>Passing parameters</h3>
-    </hgroup>
-    <article class="smaller">
-      <pre class="prettyprint" data-lang="java">
-@Param Method method;
-public enum Method {
-    TO_STRING {
-        String convert(double d) {
-            return ((Double) d).toString();
-        }
-    },
-    STRING_VALUE_OF {
-        String convert(double d) {
-            return String.valueOf(d);
-        }
-    }...
-}
-public int timePrimitive(int reps) {
-     final double d = value.value;
-     int dummy = 0;
-     for (int i = 0; i < reps; i++)
-         dummy += method.convert(d).length();
-     return dummy;
-}
-	</pre>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Caliper</h2>
-      <h3>Viewing results</h3>   	
-    </hgroup>
-    <article class="smaller">
-      <ul><li>Caliper can automatically upload benchmarks results for easier visualization</li></ul>	
-      <iframe data-src="http://microbenchmarks.appspot.com/run/jessewilson@google.com/examples.ArraySortBenchmark"></iframe>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Caliper</h2>
-      <h3>How it works</h3>
-    </hgroup>
-    <article>
-	<ul>
-	<li>A new JVM process is spawned for every run</li>
-	<li>The framework takes care of warming up the JVM</li>
-	<li>The benchmark code is run until the measured values converge within a specified threshold</li>
-	<li>The measured values are statistically analyzed to remove outliers caused by GC or dynamic compilation</li>
-      </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Caliper</h2>
-      <h3>Benefits of using it</h3>
-    </hgroup>
-    <article>
-	<ul>
-	<li>It automatically deals with all the challenges of dynamic compilation and GC</li>
-	<li>It detects when your code is being optimized away (dead code)</li>
-	<li>It usually measures execution time but it can also calculate other metrics
-	<ul>
-	    <li>CPU time</li>
-	    <li>Memory allocation</li>
-	    <li>Contention</li>
-	</ul></li>
-	<li>It's really easy to use and extend</li>
-	<li>It's highly customizable</li>
-      </ul>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Try-catch blocks</h3>
-    </hgroup>
-    <article class="smaller">
-      <pre class="prettyprint" data-lang="java">
-public class ExceptionBenchmark extends SimpleBenchmark {
-	private void isEven(int number) throws EvenException {
-	    if (number % 2 == 0)
-		throw new EvenException();
-	}
-	public int timeUseException(int reps) {
-	    int ret = 0;
-	    for (int rep = 0; rep < reps; ++rep) {
-	        <b>try {
-	            isEven(rep);
-	        } catch (final EvenException e) {ret++;}</b>
-	    }
-	    return ret;
-	}
-	public int timeNoException(int reps) {
-	    int ret = 0;
-	    for (int rep = 0; rep < reps; ++rep) {
-	        <b>if (rep % 2 == 0)
-	            ret++;</b>
-	    }
-	    return ret;
-	}
-}
-	</pre>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Try-catch blocks</h3>
-    </hgroup>
-    <article class="smaller">
-      <ul>
-	<li>542.69 vs 1.17 ns on my laptop</li>
-	<li>That's almost a 464:1 speed-up ratio!</li>
-	<li>Because exceptions are designed for exceptional circumstances, there is little incentive for JVM implementors to make them fast</li>
-	<li>Placing code inside a try-catch block inhibits certain optimizations that modern JVM implementations might otherwise perform</li>
-	<li>Doesn't mean you shouldn't use "try-catch", just don't abuse it</li>
-      </ul>	
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>String concatenation</h3>
-    </hgroup>
-    <article class="smaller">
-      <pre class="prettyprint" data-lang="java">
-public class StringConcatenationBenchmark extends SimpleBenchmark {
-    @Param({ "2", "20", "2000", "5000" }) int size;
-    public String timeConcatenation(int reps) {
-        String ret = "";
-        for (int rep = 0; rep < reps; ++rep) {
-            ret = "";
-            for (long i = 0; i < size; i++)
-                <b>ret = ret + "a";</b>
-        }
-        return ret;
-    }
-    public String timeStringBuilder(int reps) {
-        StringBuilder builder = null;
-        for (int rep = 0; rep < reps; ++rep) {
-            builder = new StringBuilder(size);
-            for (long i = 0; i < size; i++)
-                <b>builder.append("a");</b>
-        }
-        return builder.toString();
-    }
-}
-	</pre>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>String concatenation</h3>
-    </hgroup>
-    <article class="smaller">
-      <table>
-        <tr>
-          <th>Benchmark name</th><th>Size</th><th>Avg. running time (ns)</th>
-        </tr>
-        <tr>
-          <td>Concatenation</td><td>2</td><td align="right">76.3</td>
-        </tr>
-        <tr>
-          <td>StringBuilder</td><td>2</td><td>35.7</td>
-        </tr>
-        <tr>
-          <td>Concatenation</td><td>20</td><td>1096.1</td>
-        </tr>
-        <tr>
-          <td>StringBuilder</td><td>20</td><td>203.6</td>
-        </tr>
-        <tr>
-          <td>Concatenation</td><td>2000</td><td>1115237.4</td>
-        </tr>
-        <tr>
-          <td>StringBuilder</td><td>2000</td><td>18877.6</td>
-        </tr>
-        <tr>
-          <td>Concatenation</td><td>5000</td><td>6956406.2</td>
-        </tr>
-        <tr>
-          <td>StringBuilder</td><td>5000</td><td>53510.8</td>
-        </tr>
-      </table>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>String concatenation</h3>
-    </hgroup>
-    <article class="smaller">
-      <ul>
-	<li>String is immutable in Java</li>
-	<li>Using the '+' operator is O(n^2), while StringBuilder is linear</li>
-	<li>That's why the bigger the number of chars to concatenate the more dramatic the difference in performance is</li>
-	<li>The moral: don't use the '+' if you have to concatenate more than a few short strings</li>
-      </ul>	
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Primitive vs Wrappers</h3>
-    </hgroup>
-    <article class="smaller">
-      <pre class="prettyprint" data-lang="java">
-public class PrimitivesBenchmark extends SimpleBenchmark {
-    @Param({ "20", "200", "2000" }) int limit;
-    public long timeNonPrimitive(int reps) {
-        <b>Long ret = 0L;</b>
-        for (int rep = 0; rep < reps; ++rep) {
-            for (long i = 0; i < limit; i++)
-                ret += i;            
-        }
-        return ret;
-    }
-    public long timePrimitive(int reps) {
-        <b>long ret = 0L;</b>
-        for (int rep = 0; rep < reps; ++rep) {
-            for (long i = 0; i < limit; i++)
-                ret += i;
-        }
-        return ret;
-    }
-}
-	</pre>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Primitive vs Wrappers</h3>
-    </hgroup>
-    <article class="smaller">
-      <table>
-        <tr>
-          <th>Benchmark name</th><th>Size</th><th>Avg. running time (ns)</th>
-        </tr>
-        <tr>
-          <td>Primitive</td><td>20</td><td>14.0</td>
-        </tr>
-        <tr>
-          <td>NonPrimitive</td><td>20</td><td>73.6</td>
-        </tr>
-        <tr>
-          <td>Primitive</td><td>200</td><td>148.3</td>
-        </tr>
-        <tr>
-          <td>NonPrimitive</td><td>200</td><td>702.8</td>
-        </tr>
-        <tr>
-          <td>Primitive</td><td>2000</td><td>1426.4</td>
-        </tr>
-        <tr>
-          <td>NonPrimitive</td><td>2000</td><td>7292.4</td>
-        </tr>
-      </table>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Primitive vs Wrappers</h3>
-    </hgroup>
-    <article class="smaller">
-      <ul>
-	<li>Wrappers are immutable in Java</li>
-	<li>Java uses auto-boxing to automatically convert from primitive to wrapper and viceversa</li>
-	<li>That means than in the previous benchmark the wrapper is being unboxed and a new object is being instantiated after every sum</li>
-	<li>The moral: prefer primitive types over wrappers and use the latter only when needed (eg. Collections)</li>
-      </ul>	
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Object creation</h3>
-    </hgroup>
-    <article class="smaller">
-      <pre class="prettyprint" data-lang="java">
-public class ObjectCreationBenchmark extends SimpleBenchmark {
-    @Param({ "2", "20", "2000", "20000" }) int listSize;
-    private List<String> list;
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        list = new ArrayList<String>();
-    }
-    public void timeCreateList(int reps) {
-        for (int rep = 0; rep < reps; ++rep) {
-            for (int i = 0; i < listSize; i++) {
-                <b>list = new ArrayList<String>();</b>
-                list.add("create list");
-            }
-        }
-    }
-    public void timeReuseList(int reps) {
-        for (int rep = 0; rep < reps; ++rep) {
-            for (int i = 0; i < listSize; i++) {
-                <b>list.clear();</b>
-                list.add("reuse list");
-            }
-        }
-    }
-}
-	</pre>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Object creation</h3>
-    </hgroup>
-    <article class="smaller">
-      <table>
-        <tr>
-          <th>Benchmark name</th><th>Size</th><th>Avg. running time (ns)</th>
-        </tr>
-        <tr>
-          <td>CreateList</td><td>20</td><td>214</td>
-        </tr>
-        <tr>
-          <td>ReuseList</td><td>20</td><td>113</td>
-        </tr>
-        <tr>
-          <td>CreateList</td><td>200</td><td>2104</td>
-        </tr>
-        <tr>
-          <td>ReuseList</td><td>200</td><td>1092</td>
-        </tr>
-        <tr>
-          <td>CreateList</td><td>2000</td><td>21188</td>
-        </tr>
-        <tr>
-          <td>ReuseList</td><td>2000</td><td>11004</td>
-        </tr>
-      </table>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Object creation</h3>
-    </hgroup>
-    <article class="smaller">
-      <ul>
-	<li>Creating a new List every time is 100% more costly than just reusing it</li>
-	<li>This doesn't mean that you shouldn't create objects... Java is OO after all</li>
-	<li>Also, avoid "clever" optimizations like ad-hoc object caches. Their cost and complexity is usually bigger than just creating new objects</li>
-	<li>The moral: reuse objects where it makes sense, particularly in collections</li>
-      </ul>	
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Language libraries</h3>
-    </hgroup>
-    <article class="smaller">
-      <pre class="prettyprint" data-lang="java">
-public class ArrayCopyBenchmark extends SimpleBenchmark {
-    @Param({ "20", "200", "2000", "20000" }) int arraySize;
-    char[] src;
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        src = new char[arraySize];
-    }
-    public void timeManualArrayCopy(int reps) {
-        for (int rep = 0; rep < reps; ++rep) {
-            final char[] dst = new char[arraySize];
-            <b>for (int i = 0; i < arraySize; ++i)
-                dst[i] = src[i];</b>
-        }
-    }
-    public void timeSystem_arrayCopy(int reps) {
-        for (int rep = 0; rep < reps; ++rep) {
-            final char[] dst = new char[arraySize];
-            <b>System.arraycopy(src, 0, dst, 0, arraySize);</b>
-        }
-    }
-}
-	</pre>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Language libraries</h3>
-    </hgroup>
-    <article class="smaller">
-      <table>
-        <tr>
-          <th>Benchmark name</th><th>Size</th><th>Avg. running time (ns)</th>
-        </tr>
-        <tr>
-          <td>ManualArrayCopy</td><td>20</td><td>18.7</td>
-        </tr>
-        <tr>
-          <td>SystemArrayCopy</td><td>20</td><td>20.4</td>
-        </tr>
-        <tr>
-          <td>ManualArrayCopy</td><td>200</td><td>64.4</td>
-        </tr>
-        <tr>
-          <td>SystemArrayCopy</td><td>200</td><td>54.6</td>
-        </tr>
-        <tr>
-          <td>ManualArrayCopy</td><td>2000</td><td>688.1</td>
-        </tr>
-        <tr>
-          <td>SystemArrayCopy</td><td>2000</td><td>546.3</td>
-        </tr>
-        <tr>
-          <td>ManualArrayCopy</td><td>20000</td><td>7605.4</td>
-        </tr>
-        <tr>
-          <td>SystemArrayCopy</td><td>20000</td><td>7239.9</td>
-        </tr>
-      </table>
-    </article>
-  </slide>
-
-  <slide>
-    <hgroup>
-      <h2>Some interesting benchmark results</h2>
-      <h3>Language libraries</h3>
+      <h2>The cost of task switching</h2>
+      <h3>Scientific evidence</h3>
     </hgroup>
     <aside class="note">
       <section>
         <ul>
-          <li>lang, core del lenguaje: Clonable, Comparable, StringBuilder, Wrappers, Class, Thread, Math</li>
-          <li>util: collections framework, date and time, random number generator</li>
-          <li>concurrent, escencial para apps concurrentes: executor framework, concurrent collections, semaphores, countdown latch, etc</li>
-          <li>io, ahora actualizada con nio y nio2 (java 7)</li>
+          <li>This was proven by a relatively simple experiment where subjects listened to sentences while comparing two rotating objects. It was found that the ability to process visual input dropped 29% if the subject was trying to listen at the same time.</li>
         </ul>
       </section>
     </aside>
-    <article class="smaller">
+    <article>
       <ul>
-	<li>In this case the performance speedup is only about 10%</li>
-	<li>But performance is not the only reason to use the language libraries
-	<ul>
-	    <li>You take advantage of the knowledge of the experts who wrote it and the experience of those who used it before you</li>
-        <li>You can spend your time writting your app rather than reinventing the wheel</li>
-        <li>The performance of standard libraries usually improves over time, with no effort required from your part</li>
-        <li>They create a common language between developers</li>
-    </ul></li>
-	<li>The moral: know and use the libraries</li>
-	<li>It's hard to keep up with all the libraries out there but at least be familiar with java.lang, java.util, java.util.concurrent and java.io</li>
-    <li>Other really useful third-party libraries: Guava, Lambdaj, Fest Assertions, Apache Commons, Joda Time, Mockito...</li>
-      </ul>	
+	    <li>A study in the Journal of Experimental Psychology points out that the brain has to overcome "inhibitions" it imposed on itself to switch tasks</li>
+        <li>A study published in the journal NeuroImage showed that attempting to manage two mental tasks at once reduces the brainpower available for either task</li>
+      </ul>	  	
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>The cost of task switching</h2>
+      <h3>Scientific evidence</h3>
+    </hgroup>
+    <aside class="note">
+      <section>
+        <ul>
+          <li>This was proven by a relatively simple experiment where subjects listened to sentences while comparing two rotating objects. It was found that the ability to process visual input dropped 29% if the subject was trying to listen at the same time.</li>
+        </ul>
+      </section>
+    </aside>
+    <article>
+      <ul>
+	    <li>There is evidence that multitasking actually degrades short term memory, not just for the topics being multitasked but possibly by impacting areas of the brain
+        <ul>
+            <li>Multitasking creates stress</li>
+            <li>Stress invokes the more primitive parts of the brain that are concerned with personal safety, pulling energy from the more modern parts concerned with higher level thinking [1]</li>
+            <li>Stress can also damage cells needed for new memories [2]</li>
+        </ul>
+        </li>
+        <li>We are more prone to errors when we multitask so the quality of our work results goes down [3]</li>
+        <li>Some parts of the brain are sequential processors, able to accept only one input at a time [4]</li>
+      </ul>	  	
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Multitasking</h2>
+      <h3>Traditional Software development<h3>
+    </hgroup>
+    <article>
+      <ul>
+        <li>Despite all the evidence against it, traditional organizations keep doing it</li>
+        <li>A model of individuals in skill silos (specialists) assigned to multiple projects at the same time</li>
+	    <li>It is considered to be the most efficiently use of "scarce resources", i.e. not enough people and all of them specialized.</li>
+      </ul>	  	
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Multitasking</h2>
+      <h3>The Agile way<h3>
+    </hgroup>
+    <article>
+      <ul>
+        <li>The Agile model turns this on its head</li>
+        <li>We form cross-functional teams that are focused on a small set of things at a time</li>
+	    <li>And we pull instead of push</li>
+        <li>But if everyone does everything then we have a lot of context switches every day...</li>
+      </ul>	  	
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Multitasking</h2>
+      <h3>The Agile way<h3>
+    </hgroup>
+    <aside class="note">
+      <section>
+        <p>As a focused team, all of the daily activities are targeted at a narrow band of functionality and technology. Only a few stories are being worked on at a time. The context is narrow even though the range of activities is varied. Additionally, Agile has a number of devices for keeping focus – collaboration, task boards, automated testing, retrospection. It is the wide jumps in context that make trouble – other projects, other collaborators, other stakeholders.</p>
+      </section>
+    </aside>
+    <article>
+      <ul>
+        <li>The answer has to do with the scope of context</li>
+        <li>If the context switch is large, multitasking takes a toll on the individual and their collaborators</li>
+	    <li>If the switch is small, it suits the way we think and it can work just fine</li>
+      </ul>	  	
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Multitasking</h2>
+      <h3>How do we reduce switching costs in Agile?<h3>
+    </hgroup>
+    <aside class="note">
+      <section>
+        <p>As a focused team, all of the daily activities are targeted at a narrow band of functionality and technology. Only a few stories are being worked on at a time. The context is narrow even though the range of activities is varied. Additionally, Agile has a number of devices for keeping focus – collaboration, task boards, automated testing, retrospection. It is the wide jumps in context that make trouble – other projects, other collaborators, other stakeholders.</p>
+      </section>
+    </aside>
+    <article>
+      <ul>
+        <li>Information radiators: they lead to faster and more complete synthesis of information</li>
+        <li>Keep focus by working with 1 task at a time as much as possible</li>
+        <li>Explain the costs of interruptions to the client/Product Owner</li>
+        <li>Test Driven Development helps focus technical work in a narrow band for a short time</li>
+	    <li>Continuous integration helps focus by giving immediate attention to a broken build or failed test</li>
+        <li>Pair programming helps two people focus on a small area of code</li>
+        <li>Try some time-management technique to avoid personal distractions</li>
+      </ul>	  	
     </article>
   </slide>
 
@@ -928,34 +260,27 @@ public class ArrayCopyBenchmark extends SimpleBenchmark {
     <hgroup>
       <h2>Conclusions</h2>
     </hgroup>
-    <aside class="note">
-      <section>
-        <ul>
-          <li>Dont desing for performance se refiere a codigo. Siempre hay que considerar como la arquitectura va a impactar performance desde un principio</li>
-          <li>Hacer micro-benchmarks esta relacionado a aplicar el metodo cientifico</li>
-        </ul>
-      </section>
-    </aside>
     <article>
 	<ul>
-	<li>Don't desing for performance. Write clear and easy to understand code</li>
-	<li>Don't try to outsmart the compiler. It will backfire 99% of the time</li>
-	<li>Java code is particularly hard to micro-benchmark. Next time someone says "X is faster than Y", be skeptical</li>
-	<li>Micro-benchmarks results are unreliable. Use profiling on a real environment if possible</li>
-    <li>If you still feel you should micro-benchmark some code, use Caliper or a similar library. Even then, analyze the results and use your common sense</li>
+    <li>If a project is important enough to start, it is important enough to finish</li>
+	<li>Programmers need concentration time – and blocks of it – to be productive</li>
+	<li>Leave task-switching to computers</li>
     </ul>
     </article>
   </slide>
 
   <slide>
     <hgroup>
-      <h2>Links</h2>
+      <h2>References</h2>
     </hgroup>
     <article>
 	<ul>
-	<li><a href="http://code.google.com/p/caliper/">Caliiper main page</a></li>
-    <li><a href="http://code.google.com/p/dalvik/source/browse/trunk/benchmarks/">Dalvik benchmarks</a> An extensive collection of benchmarks for android core libraries</li>
-    <li><a href="http://www.ibm.com/developerworks/java/library/j-jtp12214/">Brian Goetz article</a> introducing Java dynamic compilation and HotSpot</li>
+	<li><a href="http://www.strategy-business.com/media/file/Neuroscience_of_Leadershp-webinar.pdf">[1] The Neuroscience of Leadership</a></li>
+    <li><a href="http://archive.southcoasttoday.com/daily/03-03/03-02-03/c03bu090.htm">[2] Studies show multitasking makes you stupid</a></li>
+    <li><a href="http://www.psychologytoday.com/blog/brain-sense/200908/the-madness-multitasking">[3] The Madness of Multitasking (Psychology Today)</a></li>
+    <li><a href="http://www.nytimes.com/2007/03/25/business/25multi.html?_r=4&pagewanted=all&oref=slogin">[4] Slow Down, Brave Multitasker, and Don’t Read This in Traffic</a></li>
+    <li><a href="http://www.amazon.com/The-Agile-Development-James-Shore/dp/0596527675/ref=tmm_pap_title_popover?ie=UTF8&qid=1352840957&sr=8-1">[5] The art of Agile Programming</a></li>
+    <li><a href="http://www.nytimes.com/2008/10/25/business/yourmoney/25shortcuts.html">[6] Multitasking Can Make You Lose ... Um ... Focus</a></li>
    </ul>
     </article>
   </slide>
